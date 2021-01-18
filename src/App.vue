@@ -1,27 +1,65 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js + TypeScript App"/>
+  <div class="container">
+    <GlobalHeader :user="currentUser" />
+    <ColumnList :list="list" />
+  </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import HelloWorld from './components/HelloWorld.vue'
+import 'bootstrap/dist/css/bootstrap.min.css'
+
+import ColumnList, { ColumnPrpos } from './components/ColumnList.vue'
+import GlobalHeader, { UserProps } from './components/GlobalHeader.vue'
+
+const currentUser: UserProps = {
+  isLogin: true,
+  name: 'derrick'
+}
+const testData: ColumnPrpos[] = [
+  {
+    id: 1,
+    title: 'asdasd',
+    description: 'dsads',
+    avatar: 'https://avatarfiles.alphacoders.com/218/thumb-218516.jpg'
+  },
+  {
+    id: 2,
+    title: 'asdasd',
+    description: 'dsads',
+    avatar: 'https://avatarfiles.alphacoders.com/105/thumb-105223.jpg'
+  },
+  {
+    id: 3,
+    title: 'asdasd',
+    description: 'dsads'
+    // avatar: 'https://avatarfiles.alphacoders.com/105/thumb-105223.jpg'
+  },
+  {
+    id: 4,
+    title: 'asdasd',
+    description: 'dsads',
+    avatar: 'https://avatarfiles.alphacoders.com/105/thumb-105223.jpg'
+  },
+  {
+    id: 5,
+    title: 'asdasd',
+    description: 'dsads',
+    avatar: 'https://avatarfiles.alphacoders.com/105/thumb-105223.jpg'
+  }
+]
 
 export default defineComponent({
   name: 'App',
   components: {
-    HelloWorld
+    ColumnList,
+    GlobalHeader
+  },
+  setup () {
+    return {
+      list: testData,
+      currentUser
+    }
   }
 })
 </script>
-
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
-</style>
