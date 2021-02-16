@@ -13,9 +13,6 @@ export default defineComponent({
       type: Boolean,
       default: false
     }
-  },
-  setup (props) {
-    console.log(props)
   }
 })
 </script>

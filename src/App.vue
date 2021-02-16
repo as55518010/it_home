@@ -1,64 +1,52 @@
 <template>
   <div class="container">
     <GlobalHeader :user="currentUser" />
-    <ColumnList :list="list" />
+    <Loader v-if="isLoading"/>
+    <router-view></router-view>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { computed, defineComponent, onMounted, watch } from 'vue'
+import { useStore } from 'vuex'
+import { GlobalDataProps } from '@/store'
 import 'bootstrap/dist/css/bootstrap.min.css'
+import axios from 'axios'
 
-import ColumnList, { ColumnPrpos } from './components/ColumnList.vue'
-import GlobalHeader, { UserProps } from './components/GlobalHeader.vue'
+import GlobalHeader from '@/components/GlobalHeader.vue'
+import Loader from '@/components/Loader.vue'
 
-const currentUser: UserProps = {
-  isLogin: true,
-  name: 'derrick'
-}
-const testData: ColumnPrpos[] = [
-  {
-    id: 1,
-    title: 'asdasd',
-    description: 'dsads',
-    avatar: 'https://avatarfiles.alphacoders.com/218/thumb-218516.jpg'
-  },
-  {
-    id: 2,
-    title: 'asdasd',
-    description: 'dsads',
-    avatar: 'https://avatarfiles.alphacoders.com/105/thumb-105223.jpg'
-  },
-  {
-    id: 3,
-    title: 'asdasd',
-    description: 'dsads'
-    // avatar: 'https://avatarfiles.alphacoders.com/105/thumb-105223.jpg'
-  },
-  {
-    id: 4,
-    title: 'asdasd',
-    description: 'dsads',
-    avatar: 'https://avatarfiles.alphacoders.com/105/thumb-105223.jpg'
-  },
-  {
-    id: 5,
-    title: 'asdasd',
-    description: 'dsads',
-    avatar: 'https://avatarfiles.alphacoders.com/105/thumb-105223.jpg'
-  }
-]
+import createMessage from '@/hooks/createMessage'
 
 export default defineComponent({
   name: 'App',
   components: {
-    ColumnList,
-    GlobalHeader
+    GlobalHeader,
+    Loader
   },
   setup () {
+    const stort = useStore<GlobalDataProps>()
+    const currentUser = computed(() => stort.state.user)
+    const isLoading = computed(() => stort.state.loading)
+    const token = computed(() => stort.state.token)
+    const error = computed(() => stort.state.error)
+    watch(() => error.value.status, () => {
+      const { status, message } = error.value
+      if (status && message) {
+        createMessage(message, 'error')
+      }
+    })
+    onMounted(() => {
+      // 檢測未登入，local storage 有tokern
+      if (!currentUser.value.isLogin && token.value) {
+        axios.defaults.headers.common.Authorization = `Bearer ${token.value}`
+        stort.dispatch('fetchCurrentUser')
+      }
+    })
     return {
-      list: testData,
-      currentUser
+      currentUser,
+      isLoading,
+      error
     }
   }
 })

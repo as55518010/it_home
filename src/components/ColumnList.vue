@@ -1,16 +1,16 @@
 <template>
   <div class="row">
-    <div class="col-4 mb-4" v-for="column in list" :key="column.id">
+    <div class="col-4 mb-4" v-for="column in list" :key="column._id">
       <div class="card h-100 shadow-sm">
         <div class="card-body text-center">
           <img
-            class="rounded-circle border border-light w-25 my-3"
-            :src="column.avatar"
+            class="rounded-circle border border-light my-3"
+            :src="column.avatar && column.avatar.url"
             :alt="column.title"
           />
           <h5 class="card-title">{{ column.title }}</h5>
           <p class="card-text text-left">{{ column.description }}</p>
-          <a href="#" class="btn btn-outline-primary">進入IT</a>
+          <router-link :to="`/column/${column._id}`" class="btn btn-outline-primary">進入專欄</router-link>
         </div>
       </div>
     </div>
@@ -19,12 +19,7 @@
 
 <script lang="ts">
 import { computed, defineComponent, PropType } from 'vue'
-export interface ColumnPrpos {
-  id: number;
-  title: string;
-  avatar?: string;
-  description: string;
-}
+import { ColumnPrpos } from '@/store'
 export default defineComponent({
   name: 'ColumnList',
   props: {
@@ -37,7 +32,11 @@ export default defineComponent({
     const columnList = computed(() => {
       return props.list.map((column) => {
         if (!column.avatar) {
-          column.avatar = require('@/assets/column.jpg')
+          column.avatar = {
+            url: require('@/assets/column.jpg')
+          }
+        } else {
+          column.avatar.url = column.avatar.url + '?x-oss-process=image/resize,m_pad,h_50,w_50'
         }
         return column
       })
@@ -48,3 +47,9 @@ export default defineComponent({
   }
 })
 </script>
+<style scoped>
+.card-body img{
+  width: 50px;
+  height: 50px;
+}
+</style>
