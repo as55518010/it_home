@@ -13,16 +13,6 @@
         </div>
       </div>
     </section>
-    <Uploader
-      action="/upload"
-      :beforUpload="beforUpload"
-      @file-uploaded="onFileUploaded"
-      @file-uploaded-error="onFileUploadedError"
-    >
-    <template #uploaded="dataProps">
-      <img :src="dataProps.uploadedData.data.url" width="500"/>
-    </template>
-    </Uploader>
     <h4 class="font-weight-bold text-center">发现精彩</h4>
     <column-list :list="list"></column-list>
   </div>
@@ -31,7 +21,6 @@
 <script lang="ts">
 import { computed, defineComponent, onMounted } from 'vue'
 import ColumnList from '@/components/ColumnList.vue'
-import Uploader from '@/components/Uploader.vue'
 import { useStore } from 'vuex'
 import { GlobalDataProps, ImageProps, ResponseType } from '@/store'
 import createMessage from '@/hooks/createMessage'
@@ -39,8 +28,7 @@ import createMessage from '@/hooks/createMessage'
 export default defineComponent({
   name: 'Home',
   components: {
-    ColumnList,
-    Uploader
+    ColumnList
   },
   setup () {
     const store = useStore<GlobalDataProps>()

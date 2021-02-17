@@ -10,7 +10,7 @@
         <Dropdown :title="`你好${user.nickName}`">
           <DropdownItem><router-link class="dropdown-item" to="create">新建文章</router-link></DropdownItem>
           <DropdownItem :disabled="true"><a class="dropdown-item" href="#">編輯資料</a></DropdownItem>
-          <DropdownItem><a class="dropdown-item" href="#">退出登入</a></DropdownItem>
+          <DropdownItem><a class="dropdown-item" href="#" @click="logout">退出登入</a></DropdownItem>
         </Dropdown>
       </li>
     </ul>
@@ -21,7 +21,9 @@
 import { defineComponent, PropType } from 'vue'
 import Dropdown from './Dropdown.vue'
 import DropdownItem from './DropdownItem.vue'
-import { UserProps } from '@/store'
+import store, { UserProps } from '@/store'
+import router from '@/router'
+import createMessage from '@/hooks/createMessage'
 
 export default defineComponent({
   name: 'GlobalHeader',
@@ -33,6 +35,18 @@ export default defineComponent({
     user: {
       type: Object as PropType<UserProps>,
       required: true
+    }
+  },
+  setup () {
+    const logout = () => {
+      store.commit('logout')
+      createMessage('登出成功 2秒後跳轉首頁', 'success')
+      setTimeout(() => {
+        router.push('/')
+      }, 2000)
+    }
+    return {
+      logout
     }
   }
 })

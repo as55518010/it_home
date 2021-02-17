@@ -63,7 +63,7 @@ export default defineComponent({
           email: emailVal.value,
           password: passwordVal.value
         }
-        stort.dispatch('loginAndFetch', payload).then(data => {
+        stort.dispatch('loginAndFetch', payload).then(() => {
           createMessage('登入成功 2秒後跳轉首頁', 'success')
           setTimeout(() => {
             router.push('/')

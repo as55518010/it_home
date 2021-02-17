@@ -1,12 +1,6 @@
 import { createStore, Commit } from 'vuex'
 import axios from 'axios'
 
-interface ColumnProps {
-  _id: string;
-  title: string;
-  avatar?: string;
-  description: string;
-}
 const getAndCommit = async (url: string, mutationName: string, commit: Commit) => {
   const { data } = await axios.get(url)
   commit(mutationName, data)
@@ -17,9 +11,16 @@ const postAndCommit = async (url: string, mutationName: string, payload: any, co
   commit(mutationName, data)
   return data
 }
+export interface ColumnProps {
+  _id: string;
+  title: string;
+  avatar?: string;
+  description: string;
+}
 export interface ImageProps{
   _id?: string;
   url: string;
+  fitUrl?: string;
   createdAt?: string;
 }
 export interface ResponseType<P={}>{
@@ -100,6 +101,12 @@ const store = createStore<GlobalDataProps>({
       state.token = token
       localStorage.setItem('token', token)
       axios.defaults.headers.common.Authorization = `Bearer ${token}`
+    },
+    logout (state) {
+      state.token = ''
+      state.user = { isLogin: false }
+      localStorage.removeItem('token')
+      delete axios.defaults.headers.common.Authorization
     }
   },
   actions: {

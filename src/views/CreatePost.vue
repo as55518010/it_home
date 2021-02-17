@@ -1,7 +1,23 @@
 <template>
   <div class="create-post-page">
     <h4>新建文章</h4>
-    <input type="file" name="file" @change.prevent="handleFileChange">
+    <Uploader
+      action="/upload"
+      :beforUpload="uploadCheck"
+      class="d-flex align-items-center justify-content-center bg-light text-secendary w-100 my-4"
+    >
+    <h2>典籍上船圖</h2>
+    <template #loading>
+      <div class="d-flex">
+        <div class="spinner-border text-secondary">
+        </div>
+        <h2>正在上傳</h2>
+      </div>
+    </template>
+    <template #uploaded="{uploadedData}">
+      <img :src="uploadedData.data.url" alt="">
+    </template>
+    </Uploader>
     <validate-form @form-submit="onFormSubmit">
       <div class="mb-3">
         <label class="form-label">文章标题：</label>
@@ -31,16 +47,20 @@
 <script lang="ts">
 import { defineComponent, ref } from 'vue'
 import ValidateInput, { RulesProp } from '@/components/ValidateInput.vue'
+import Uploader from '@/components/Uploader.vue'
 import ValidateForm from '@/components/ValidateForm.vue'
 import { GlobalDataProps, PostProps } from '@/store'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
+import { beforeUploadCheck } from '@/helper'
+import createMessage from '@/hooks/createMessage'
 export default defineComponent({
   name: 'Login',
   components: {
     ValidateInput,
-    ValidateForm
+    ValidateForm,
+    Uploader
   },
   setup () {
     const router = useRouter()
@@ -74,14 +94,26 @@ export default defineComponent({
         const uploadedFile = files[0]
         const formData = new FormData()
         formData.append(uploadedFile.name, uploadedFile)
-        axios.post('/upload', formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          }
-        }).then(resp => {
-          console.log(resp)
-        })
+        axios
+          .post('/upload', formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data'
+            }
+          })
+          .then((resp) => {
+            console.log(resp)
+          })
       }
+    }
+    const uploadCheck = (file: File) => {
+      const { passed, error } = beforeUploadCheck(file, { format: ['image/jpeg'], size: 1 })
+      if (error === 'format') {
+        createMessage('上傳圖片只能是JPG/PNG 格式', 'error')
+      }
+      if (error === 'size') {
+        createMessage('上傳圖片只能是JPG/PNG 格式', 'error')
+      }
+      return passed
     }
     return {
       titleVal,
@@ -89,7 +121,8 @@ export default defineComponent({
       contentVal,
       contentRules,
       onFormSubmit,
-      handleFileChange
+      handleFileChange,
+      uploadCheck
     }
   }
 })
