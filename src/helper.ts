@@ -1,4 +1,4 @@
-import { ImageProps } from '@/store'
+import { ImageProps, ColumnProps, UserProps } from '@/store'
 export function generateFitUrl (data: ImageProps, width: number, height: number, format = ['m_pad']) {
   if (data && data.url) {
     const formatStr = format.reduce((prev, current) => {
@@ -26,5 +26,15 @@ export function beforeUploadCheck (file: File, condition: CheckCondition) {
   return {
     passed: isValidFormat && isValidSize,
     error
+  }
+}
+export function addColumnAvatar (data: ColumnProps | UserProps, width: number, height: number) {
+  if (data.avatar) {
+    generateFitUrl(data.avatar, width, height)
+  } else {
+    const parseCol = data as ColumnProps
+    data.avatar = {
+      fitUrl: require(parseCol.title ? '@/assets/column.jpg' : '@/assets/avatar.jpg')
+    }
   }
 }

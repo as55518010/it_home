@@ -1,10 +1,11 @@
 <template>
   <div class="create-post-page">
-    <h4>新建文章</h4>
+    <h4>編輯文章</h4>
     <Uploader
       action="/upload"
       :beforUpload="uploadCheck"
       @file-uploaded="handleFileUploaded"
+      :uploaded="uploadData"
       class="d-flex align-items-center justify-content-center bg-light text-secendary w-100 my-4"
     >
     <h2>典籍上船圖</h2>
@@ -39,20 +40,20 @@
         />
       </div>
       <template #submit>
-        <button class="btn btn-primary btn-large">发表文章</button>
+        <button class="btn btn-primary btn-large">更新文章</button>
       </template>
     </validate-form>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue'
+import { defineComponent, onMounted, ref } from 'vue'
 import ValidateInput, { RulesProp } from '@/components/ValidateInput.vue'
 import Uploader from '@/components/Uploader.vue'
 import ValidateForm from '@/components/ValidateForm.vue'
 import { GlobalDataProps, PostProps, ResponseType, ImageProps } from '@/store'
 import { useStore } from 'vuex'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
 import { beforeUploadCheck } from '@/helper'
 import createMessage from '@/hooks/createMessage'
@@ -64,7 +65,9 @@ export default defineComponent({
     Uploader
   },
   setup () {
+    const uploadData = ref()
     const router = useRouter()
+    const route = useRoute()
     const stort = useStore<GlobalDataProps>()
     const titleVal = ref('')
     let imageId = ''
@@ -75,6 +78,16 @@ export default defineComponent({
     const contentRules: RulesProp = [
       { type: 'required', message: '文章详情不能为空' }
     ]
+    onMounted(() => {
+      stort.dispatch('fetchPost', route.query.id).then((rawData: ResponseType<PostProps>) => {
+        const currentPost = rawData.data
+        if (currentPost.image) {
+          uploadData.value = { data: currentPost.image }
+        }
+        titleVal.value = currentPost.title
+        contentVal.value = currentPost.content || ''
+      })
+    })
     const handleFileUploaded = (rawData: ResponseType<ImageProps>) => {
       if (rawData.data._id) {
         imageId = rawData.data._id
@@ -93,8 +106,11 @@ export default defineComponent({
           if (imageId) {
             newPost.image = imageId
           }
-
-          stort.dispatch('createPost', newPost).then(() => {
+          const sendData = {
+            id: route.query.id,
+            payload: newPost
+          }
+          stort.dispatch('updatePost', sendData).then(() => {
             createMessage('發表成功 2秒後跳轉文章', 'success')
             setTimeout(() => {
               router.push(`/column/${column}`)
@@ -139,7 +155,8 @@ export default defineComponent({
       onFormSubmit,
       handleFileChange,
       uploadCheck,
-      handleFileUploaded
+      handleFileUploaded,
+      uploadData
     }
   }
 })

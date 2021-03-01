@@ -1,5 +1,5 @@
 import { createStore, Commit } from 'vuex'
-import axios from 'axios'
+import axios, { AxiosRequestConfig } from 'axios'
 
 const getAndCommit = async (url: string, mutationName: string, commit: Commit) => {
   const { data } = await axios.get(url)
@@ -11,24 +11,23 @@ const postAndCommit = async (url: string, mutationName: string, payload: any, co
   commit(mutationName, data)
   return data
 }
-export interface ColumnProps {
-  _id: string;
-  title: string;
-  avatar?: string;
-  description: string;
+const asyncAndCommit = async (url: string, mutationName: string, commit: Commit, config: AxiosRequestConfig = { method: 'get' }) => {
+  const { data } = await axios(url, config)
+  commit(mutationName, data)
+  return data
 }
-export interface ImageProps{
+export interface ImageProps {
   _id?: string;
-  url: string;
-  fitUrl?: string;
+  url?: string;
   createdAt?: string;
+  fitUrl?: string;
 }
 export interface ResponseType<P={}>{
   code: number;
   msg: string;
   data: P;
 }
-export interface ColumnPrpos {
+export interface ColumnProps {
   _id: string;
   title: string;
   avatar?: ImageProps;
@@ -39,9 +38,11 @@ export interface PostProps {
   title: string;
   excerpt?: string;
   content?: string;
-  image?: ImageProps;
+  image?: ImageProps|string;
   createdAt?: string;
   column: string;
+  author?: UserProps|string;
+  isHTML?: boolean;
 }
 export interface GlobalErrorProps{
   status: boolean;
@@ -55,12 +56,14 @@ export interface GlobalDataProps{
   posts: PostProps[];
   user: UserProps;
 }
-export interface UserProps{
+export interface UserProps {
   isLogin: boolean;
   nickName?: string;
   _id?: string;
   column?: string;
   email?: string;
+  avatar?: ImageProps;
+  description?: string;
 }
 const store = createStore<GlobalDataProps>({
   state: {
@@ -83,6 +86,21 @@ const store = createStore<GlobalDataProps>({
     },
     fetchPosts (state, rawData) {
       state.posts = rawData.data.list
+    },
+    deletePost (state, { data }) {
+      state.posts = state.posts.filter(post => post._id !== data._id)
+    },
+    fetchPost (state, { data }) {
+      state.posts = state.posts.map(post => {
+        if (post._id === data._id) {
+          return data
+        } else {
+          return post
+        }
+      })
+    },
+    updatePost (state, rawData) {
+      state.posts = [rawData.data]
     },
     setLoading (state, status) {
       state.loading = status
@@ -119,11 +137,26 @@ const store = createStore<GlobalDataProps>({
     fetchPosts ({ commit }, cid) {
       return getAndCommit(`/columns/${cid}/posts`, 'fetchPosts', commit)
     },
+    fetchPost ({ commit }, cid) {
+      return getAndCommit(`/posts/${cid}`, 'fetchPost', commit)
+    },
     fetchCurrentUser ({ commit }) {
       return getAndCommit('/user/current', 'fetchCurrentUser', commit)
     },
+    updatePost ({ commit }, { id, payload }) {
+      return asyncAndCommit(`/posts/${id}`, 'updatePost', commit, {
+        method: 'patch',
+        data: payload
+      })
+    },
     login ({ commit }, payload) {
       return postAndCommit('/user/login', 'login', payload, commit)
+    },
+    createPost ({ commit }, payload) {
+      return postAndCommit('/posts', 'createPost', payload, commit)
+    },
+    deletePost ({ commit }, id) {
+      return asyncAndCommit(`/posts/${id}`, 'deletePost', commit, { method: 'delete' })
     },
     loginAndFetch ({ dispatch }, loginData) {
       return dispatch('login', loginData).then(() => {
@@ -132,11 +165,14 @@ const store = createStore<GlobalDataProps>({
     }
   },
   getters: {
-    getColumnById: (status) => (id: string) => {
-      return status.columns.find(c => c._id === id)
+    getColumnById: (state) => (id: string) => {
+      return state.columns.find(c => c._id === id)
     },
-    getPostByCid: (status) => (cid: string) => {
-      return status.posts.filter(c => c.column === cid)
+    getPostByCid: (state) => (cid: string) => {
+      return state.posts.filter(c => c.column === cid)
+    },
+    getCurrentPost: (state) => (pid: string) => {
+      return state.posts.find(c => c._id === pid)
     }
   }
 })

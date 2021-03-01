@@ -5,7 +5,7 @@ import store, { GlobalErrorProps } from '@/store'
 import axios from 'axios'
 
 const app = createApp(App)
-axios.defaults.baseURL = 'api'
+axios.defaults.baseURL = '/api'
 // 請求攔截器
 axios.interceptors.request.use(config => {
   const error: GlobalErrorProps = {

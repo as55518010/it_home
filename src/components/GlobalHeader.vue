@@ -8,7 +8,8 @@
     <ul v-else class="list-inline mb-0">
       <li class="list-inline-item">
         <Dropdown :title="`你好${user.nickName}`">
-          <DropdownItem><router-link class="dropdown-item" to="create">新建文章</router-link></DropdownItem>
+          <DropdownItem><router-link class="dropdown-item" to="/create">新建文章</router-link></DropdownItem>
+          <DropdownItem><router-link class="dropdown-item" :to="`/column/${user.column}`">我的專欄</router-link></DropdownItem>
           <DropdownItem :disabled="true"><a class="dropdown-item" href="#">編輯資料</a></DropdownItem>
           <DropdownItem><a class="dropdown-item" href="#" @click="logout">退出登入</a></DropdownItem>
         </Dropdown>

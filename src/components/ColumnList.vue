@@ -19,12 +19,12 @@
 
 <script lang="ts">
 import { computed, defineComponent, PropType } from 'vue'
-import { ColumnPrpos } from '@/store'
+import { ColumnProps } from '@/store'
 export default defineComponent({
   name: 'ColumnList',
   props: {
     list: {
-      type: Array as PropType<ColumnPrpos[]>,
+      type: Array as PropType<ColumnProps[]>,
       required: true
     }
   },
