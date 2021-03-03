@@ -72,9 +72,11 @@ export default defineComponent({
       return store.getters.getCurrentPost(currentId)
     })
     const currentHTML = computed(() => {
-      const { content, isHTML } = currentPost.value
+      // const { content, isHTML } = currentPost.value
+      const { content } = currentPost.value
       if (currentPost.value && content) {
-        return isHTML ? content : md.render(content)
+        return md.render(content)
+        // return isHTML ? content : md.render(content)
       }
     })
     // 顯示修改權限
